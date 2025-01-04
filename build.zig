@@ -4,7 +4,7 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    _ = b.addModule("StringBuilder", .{
+    _ = b.addModule("string_builder", .{
         .root_source_file = b.path("src/StringBuilder.zig"),
     });
     // Creates a step for unit testing. This only builds the test executable
