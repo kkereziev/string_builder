@@ -16,6 +16,10 @@ pub fn init(alloc: std.mem.Allocator) Self {
     };
 }
 
+pub fn deinit(self: *Self) void {
+    self._alloc.free(self._buf);
+}
+
 pub fn initWithCapacity(alloc: std.mem.Allocator, size: usize) !Self {
     if (size == 0) {
         return Error.ZeroSize;
@@ -28,10 +32,6 @@ pub fn initWithCapacity(alloc: std.mem.Allocator, size: usize) !Self {
         ._alloc = alloc,
         ._buf = buf,
     };
-}
-
-pub fn deinit(self: *Self) void {
-    self._alloc.free(self._buf);
 }
 
 pub fn write(self: *Self, str: []const u8) !void {
@@ -56,6 +56,10 @@ pub fn string(self: *Self) []const u8 {
 
 pub fn len(self: *Self) usize {
     return self._pos;
+}
+
+pub fn reset(self: *Self) void {
+    self._pos = 0;
 }
 
 inline fn ensureCapacity(self: *Self, required_capacity: usize) !void {
@@ -170,4 +174,19 @@ test "init with write" {
     assert(sb._pos == 21);
     assert(sb._buf.len == 38);
     try t.expectEqualStrings("abcwedasdasdawqewqewq", sb.string());
+}
+
+test "reset" {
+    var sb = try initWithCapacity(std.testing.allocator, 10);
+    defer sb.deinit();
+
+    try sb.write("abc");
+
+    try t.expectEqualStrings("abc", sb.string());
+
+    sb.reset();
+
+    try t.expectEqualStrings("", sb.string());
+    assert(sb._buf.len == 10);
+    assert(sb._pos == 0);
 }
